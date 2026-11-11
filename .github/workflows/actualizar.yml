@@ -2,7 +2,7 @@ name: Actualizar calendarios
 
 on:
   schedule:
-    - cron: "7 */2 * * *"   # cada 2 horas (hora UTC)
+    - cron: "7 5 * * *"     # una vez al día, 05:07 UTC (6:07 en invierno, 7:07 en verano)
   workflow_dispatch:         # botón "Run workflow" para forzar una actualización
   push:
     branches: [main]         # al editar favoritos.json o la web se vuelve a publicar
