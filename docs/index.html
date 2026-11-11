@@ -237,7 +237,13 @@
     const sel = $("#team");
     const favs = teams.filter((t) => isFav(t.id));
     const rest = teams.filter((t) => !isFav(t.id));
-    const opt = (t) => `<option value="${t.id}">${isFav(t.id) ? "★ " : ""}${esc(short(t.nombre))} — ${esc(t.categoria.split(" - ")[0])}</option>`;
+    // "C.T. BCN U17 - JÚNIOR FEMENÍ ... - FASE PREVIA - 01" -> "C.T. BCN U17 - JÚNIOR FEMENÍ ..."
+    const cat = (c) => {
+      const base = c.split(/ - (?=(?:PRIMERA |SEGONA )?FASE\b)/i)[0].trim();
+      const niv = c.match(/\bNIVELL [A-Z]\b/i);
+      return niv && !base.includes(niv[0]) ? `${base} · ${niv[0]}` : base;
+    };
+    const opt = (t) => `<option value="${t.id}">${isFav(t.id) ? "★ " : ""}${esc(short(t.nombre))} — ${esc(cat(t.categoria))}</option>`;
     sel.innerHTML =
       (favs.length ? `<optgroup label="Favoritos">${favs.map(opt).join("")}</optgroup>` : "") +
       `<optgroup label="${favs.length ? "Otros equipos" : "Equipos"}">${rest.map(opt).join("")}</optgroup>`;
