@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Partidos CNB Vilanova</title>
+<meta name="theme-color" content="#0f2a4a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%80%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #f3f4f7;
+    --card: #ffffff;
+    --ink: #17202b;
+    --muted: #5d6877;
+    --line: #e2e5ea;
+    --brand: #0f2a4a;
+    --brand-ink: #ffffff;
+    --accent: #e8702a;
+    --changed: #c8102e;
+    --win: #1d7a46;
+    --loss: #a3342b;
+    --chip: #eef1f5;
+    --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 2px 8px rgba(16, 24, 40, .05);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e131a;
+      --card: #171e28;
+      --ink: #e8ecf1;
+      --muted: #98a3b3;
+      --line: #263040;
+      --brand: #0b1f37;
+      --accent: #f08a4b;
+      --changed: #ff5d6c;
+      --win: #4cc38a;
+      --loss: #ff8a7a;
+      --chip: #212b38;
+      --shadow: none;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+
+  header {
+    background: var(--brand);
+    color: var(--brand-ink);
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 18px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  .brand { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .brand h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+  .brand h1 span { color: var(--accent); }
+  .fresh { font-size: 12px; opacity: .7; }
+
+  .picker { display: flex; gap: 8px; margin-top: 14px; }
+  .picker select {
+    flex: 1; min-width: 0;
+    font: inherit; font-size: 16px; font-weight: 600;
+    padding: 11px 12px;
+    border-radius: 10px; border: 0;
+    background: #fff; color: #17202b;
+  }
+  .star {
+    flex: none;
+    width: 46px; border-radius: 10px; border: 1px solid rgba(255,255,255,.25);
+    background: transparent; color: #fff; font-size: 22px; line-height: 1; cursor: pointer;
+  }
+  .star[aria-pressed="true"] { color: #ffc23d; }
+  .star:disabled { cursor: default; opacity: 1; }
+  .favnote { margin-top: 8px; font-size: 12px; opacity: .75; min-height: 1em; }
+  .favnote a { color: #fff; }
+
+  main { padding: 16px 16px calc(32px + env(safe-area-inset-bottom, 0px)); }
+  .team-head h2 { margin: 0; font-size: 20px; letter-spacing: -.01em; }
+  .team-head p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+
+  .tabs { display: flex; gap: 4px; margin: 16px 0 12px; background: var(--chip); padding: 4px; border-radius: 12px; }
+  .tabs button {
+    flex: 1; font: inherit; font-weight: 600; font-size: 14px;
+    padding: 9px 8px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); cursor: pointer;
+  }
+  .tabs button[aria-selected="true"] { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+  .tabs .n { font-weight: 500; opacity: .7; margin-left: 4px; }
+
+  .opts { display: flex; justify-content: flex-end; margin: -4px 0 10px; font-size: 13px; color: var(--muted); }
+  .opts label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+
+  .list { display: grid; gap: 10px; }
+  .match {
+    display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 14px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 14px; box-shadow: var(--shadow);
+  }
+  .match.next { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow); }
+  .next-label { grid-column: 1 / -1; margin: -2px 0 -6px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  .cal { text-align: center; border-radius: 10px; background: var(--chip); padding: 6px 0 7px; align-self: start; }
+  .cal .dow { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: .04em; }
+  .cal .day { font-size: 24px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .cal .mon { font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); }
+  .cal.changed { background: color-mix(in srgb, var(--changed) 12%, transparent); }
+  .cal.changed .day, .cal.changed .dow, .cal.changed .mon { color: var(--changed); }
+
+  .body { min-width: 0; }
+  .row1 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .time { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .time.changed { color: var(--changed); font-weight: 800; }
+  .rel { font-size: 13px; color: var(--muted); }
+  .bang {
+    display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--changed); color: #fff; font-size: 12px; font-weight: 900; line-height: 1;
+  }
+  .chip { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--chip); color: var(--muted); letter-spacing: .02em; }
+  .chip.home { background: color-mix(in srgb, var(--win) 14%, transparent); color: var(--win); }
+  .chip.away { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+  .chip.chg { background: color-mix(in srgb, var(--changed) 13%, transparent); color: var(--changed); }
+
+  .rival { margin-top: 6px; font-size: 16px; font-weight: 650; overflow-wrap: anywhere; }
+  .rival .vs { font-weight: 500; color: var(--muted); font-size: 14px; margin-right: 4px; }
+  .rival .city { font-weight: 500; color: var(--muted); font-size: 14px; }
+
+  .venue { margin-top: 8px; display: flex; align-items: flex-start; gap: 6px; font-size: 13.5px; color: var(--muted); }
+  .venue .pin { flex: none; }
+  .venue .vtxt { min-width: 0; overflow-wrap: anywhere; }
+  .venue b { color: var(--ink); font-weight: 600; }
+  .venue .go.small { margin-left: 6px; white-space: nowrap; }
+  .goline { margin-top: 10px; }
+  .go {
+    display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+    font-size: 13px; font-weight: 700; color: #fff; background: #1a73e8;
+    padding: 6px 11px; border-radius: 8px;
+  }
+  .go.small { background: transparent; color: #1a73e8; padding: 0; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .go.small { color: #8ab4f8; } }
+
+  .score { margin-top: 8px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .score .pts { font-size: 22px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .score .us { font-weight: 800; color: var(--ink); }
+  .res { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; color: var(--card); }
+  .res.w { background: var(--win); } .res.l { background: var(--loss); } .res.d { background: var(--muted); }
+  .links { margin-top: 8px; font-size: 13px; }
+  .links a { color: var(--muted); }
+
+  .empty, .error { text-align: center; color: var(--muted); padding: 40px 16px; background: var(--card); border-radius: 14px; border: 1px dashed var(--line); }
+  .error { color: var(--changed); }
+  footer { text-align: center; font-size: 12px; color: var(--muted); padding: 0 16px 24px; }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <h1>🏀 CNB Vilanova <span>·</span> Partidos</h1>
+      <div class="fresh" id="fresh"></div>
+    </div>
+    <div class="picker">
+      <select id="team" aria-label="Equipo"></select>
+      <button class="star" id="star" type="button" aria-pressed="false" title="Añadir a favoritos">☆</button>
+    </div>
+    <div class="favnote" id="favnote"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="view"><div class="empty">Cargando…</div></div>
+</main>
+
+<footer class="wrap">
+  Datos de <a href="https://cnbvilanova.com/calendari-club/" target="_blank" rel="noopener">cnbvilanova.com</a>,
+  actualizados automáticamente cada 2 horas.
+  <span id="editlink"></span>
+</footer>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const LS_FAVS = "cnbv.favoritos", LS_TEAM = "cnbv.equipo";
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+
+  let teams = [], common = [], local = store.get(LS_FAVS, []).map(String);
+  let current = null, tab = "proximos";
+  const cache = {};
+
+  // ---------- GitHub: enlace para editar los favoritos comunes
+  const gh = (() => {
+    const m = location.hostname.match(/^([^.]+)\.github\.io$/i);
+    if (!m) return null;
+    const repo = location.pathname.split("/").filter(Boolean)[0] || `${m[1]}.github.io`;
+    return `https://github.com/${m[1]}/${repo}/edit/main/docs/favoritos.json`;
+  })();
+
+  const getJSON = (u) => fetch(u, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const isFav = (id) => common.includes(id) || local.includes(id);
+
+  // ---------- fechas
+  const toDate = (p) => {
+    const [y, m, d] = p.fecha.split("-").map(Number);
+    const [hh, mm] = (p.hora || "00:00").split(":").map(Number);
+    return new Date(y, m - 1, d, hh, mm);
+  };
+  const fmt = (d, o) => new Intl.DateTimeFormat("es-ES", o).format(d).replace(".", "");
+  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  function relDay(d) {
+    const days = Math.round((startOfDay(d) - startOfDay(new Date())) / 864e5);
+    if (days === 0) return "Hoy";
+    if (days === 1) return "Mañana";
+    if (days === -1) return "Ayer";
+    if (days > 1 && days < 7) return `en ${days} días`;
+    return "";
+  }
+  function ago(iso) {
+    const min = Math.round((Date.now() - new Date(iso)) / 6e4);
+    if (min < 1) return "ahora mismo";
+    if (min < 60) return `hace ${min} min`;
+    const h = Math.round(min / 60);
+    if (h < 24) return `hace ${h} h`;
+    return fmt(new Date(iso), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  }
+
+  // ---------- selector de equipo
+  const short = (n) => n.replace(/^CNB VILANOVA\s*/i, "").replace(/^AKO[-\s]*/i, "") || n;
+  function renderPicker() {
+    const sel = $("#team");
+    const favs = teams.filter((t) => isFav(t.id));
+    const rest = teams.filter((t) => !isFav(t.id));
+    const opt = (t) => `<option value="${t.id}">${isFav(t.id) ? "★ " : ""}${esc(short(t.nombre))} — ${esc(t.categoria.split(" - ")[0])}</option>`;
+    sel.innerHTML =
+      (favs.length ? `<optgroup label="Favoritos">${favs.map(opt).join("")}</optgroup>` : "") +
+      `<optgroup label="${favs.length ? "Otros equipos" : "Equipos"}">${rest.map(opt).join("")}</optgroup>`;
+    if (current) sel.value = current;
+    renderStar();
+  }
+  function renderStar() {
+    const b = $("#star"), note = $("#favnote");
+    const isCommon = common.includes(current), isLocal = local.includes(current);
+    b.textContent = isCommon || isLocal ? "★" : "☆";
+    b.setAttribute("aria-pressed", String(isCommon || isLocal));
+    b.disabled = isCommon;
+    b.title = isCommon ? "Favorito común (para todos)" : isLocal ? "Quitar de favoritos" : "Añadir a favoritos";
+    note.innerHTML = isCommon
+      ? `★ Favorito común, lo ven todos los navegadores${gh ? ` · <a href="${gh}" target="_blank" rel="noopener">editar lista común</a>` : ""}`
+      : isLocal ? "★ Favorito solo en este navegador" : "";
+  }
+  $("#star").addEventListener("click", () => {
+    if (!current || common.includes(current)) return;
+    local = local.includes(current) ? local.filter((x) => x !== current) : [...local, current];
+    store.set(LS_FAVS, local);
+    renderPicker();
+  });
+  $("#team").addEventListener("change", (e) => selectTeam(e.target.value));
+  window.addEventListener("hashchange", () => { const id = location.hash.slice(1); if (id && id !== current) selectTeam(id); });
+
+  async function selectTeam(id) {
+    current = id;
+    store.set(LS_TEAM, id);
+    if (location.hash.slice(1) !== id) history.replaceState(null, "", "#" + id);
+    $("#team").value = id;
+    renderStar();
+    $("#view").innerHTML = `<div class="empty">Cargando…</div>`;
+    try {
+      cache[id] ??= await getJSON(`data/equipos/${id}.json`);
+      if (current === id) renderTeam(cache[id]);
+    } catch {
+      if (current === id) $("#view").innerHTML = `<div class="error">No se ha podido cargar el calendario de este equipo.</div>`;
+    }
+  }
+
+  // ---------- calendario
+  function split(t) {
+    const now = Date.now();
+    const done = [], pending = [];
+    for (const p of t.partidos) {
+      const d = toDate(p);
+      // jugado si hay marcador o si ya hace más de 3 h de la hora de inicio
+      (p.marcador || d.getTime() < now - 3 * 36e5 ? done : pending).push({ ...p, d });
+    }
+    pending.sort((a, b) => a.d - b.d);
+    done.sort((a, b) => b.d - a.d);
+    return { pending, done };
+  }
+
+  function renderTeam(t) {
+    const { pending, done } = split(t);
+    const items = tab === "proximos" ? pending
+      : tab === "jugados" ? done
+      : [...done, ...pending].sort((a, b) => a.d - b.d);
+
+    $("#view").innerHTML = `
+      <div class="team-head">
+        <h2>${esc(t.nombre)}</h2>
+        <p>${esc(t.categoria)}</p>
+      </div>
+      <div class="tabs" role="tablist">
+        ${tabBtn("proximos", "Próximos", pending.length)}
+        ${tabBtn("jugados", "Jugados", done.length)}
+        ${tabBtn("todos", "Todos", t.partidos.length)}
+      </div>
+      <div class="list">${
+        items.length
+          ? items.map((p) => card(p, t, tab !== "jugados" && p === pending[0])).join("")
+          : `<div class="empty">${tab === "proximos" ? "No quedan partidos pendientes." : "Todavía no se ha jugado ningún partido."}</div>`
+      }</div>`;
+    document.querySelectorAll(".tabs button").forEach((b) =>
+      b.addEventListener("click", () => { tab = b.dataset.tab; renderTeam(t); }));
+  }
+  const tabBtn = (id, label, n) =>
+    `<button role="tab" data-tab="${id}" aria-selected="${tab === id}">${label}<span class="n">${n}</span></button>`;
+
+  function card(p, t, isNext) {
+    const d = p.d;
+    const played = !!p.marcador;
+    const past = d.getTime() < Date.now();
+    const chg = p.cambio;
+    const rel = relDay(d);
+    const otherVenue = p.enCasa && t.pabellonHabitual && p.pabellon !== t.pabellonHabitual;
+    const showGo = !played && (!p.enCasa || otherVenue) && p.lat != null;
+    const maps = p.lat != null ? `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lon}` : null;
+    const route = p.lat != null ? `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}` : null;
+    const cityRival = p.ciudadRival ? ` <span class="city">(${esc(p.ciudadRival)})</span>` : "";
+
+    let result = "";
+    if (played) {
+      const [h, a] = p.marcador;
+      const us = p.enCasa ? h : a, them = p.enCasa ? a : h;
+      const r = us > them ? ["w", "Victoria"] : us < them ? ["l", "Derrota"] : ["d", "Empate"];
+      result = `
+        <div class="score" title="${esc(p.local)} ${h} – ${a} ${esc(p.visitante)}">
+          <span class="pts">${p.enCasa ? `<span class="us">${h}</span> – ${a}` : `${h} – <span class="us">${a}</span>`}</span>
+          <span class="res ${r[0]}">${r[1]}</span>
+        </div>`;
+    } else if (past) {
+      result = `<div class="score"><span class="chip">Resultado pendiente</span></div>`;
+    }
+
+    return `
+      <article class="match${isNext ? " next" : ""}">
+        ${isNext ? `<div class="next-label">Próximo partido</div>` : ""}
+        <div class="cal${chg ? " changed" : ""}">
+          <div class="dow">${fmt(d, { weekday: "short" })}</div>
+          <div class="day">${d.getDate()}</div>
+          <div class="mon">${fmt(d, { month: "short" })}</div>
+        </div>
+        <div class="body">
+          <div class="row1">
+            ${chg ? `<span class="bang" title="Fecha u hora cambiada" aria-label="Cambiado">!</span>` : ""}
+            <span class="time${chg ? " changed" : ""}">${p.hora ? esc(p.hora) : "Hora por definir"}</span>
+            ${rel && !played ? `<span class="rel">${rel}</span>` : ""}
+            <span class="chip ${p.enCasa ? "home" : "away"}">${p.enCasa ? "LOCAL" : "FUERA"}</span>
+            ${chg ? `<span class="chip chg">CAMBIADO</span>` : ""}
+          </div>
+          <div class="rival"><span class="vs">${p.enCasa ? "vs" : "en casa de"}</span>${esc(p.rival)}${cityRival}</div>
+          ${result}
+          <div class="venue">
+            <span class="pin">📍</span>
+            <span class="vtxt"><b>${esc(p.pabellon || "Pabellón por confirmar")}</b>${p.ciudad ? ` · ${esc(p.ciudad)}` : ""}${
+              !showGo && maps ? `<a class="go small" href="${maps}" target="_blank" rel="noopener">Mapa</a>` : ""}</span>
+          </div>
+          ${showGo ? `<div class="goline"><a class="go" href="${route}" target="_blank" rel="noopener">Cómo llegar ↗</a></div>` : ""}
+          ${p.estadisticas && played ? `<div class="links"><a href="${p.estadisticas}" target="_blank" rel="noopener">Estadísticas del partido</a></div>` : ""}
+        </div>
+      </article>`;
+  }
+
+  // ---------- arranque
+  async function init() {
+    try {
+      const [t, f, e] = await Promise.all([
+        getJSON("data/equipos.json"),
+        getJSON("favoritos.json").catch(() => ({ equipos: [] })),
+        getJSON("data/estado.json").catch(() => null),
+      ]);
+      teams = t;
+      const ids = new Set(teams.map((x) => x.id));
+      common = (f.equipos || []).map(String).filter((id) => ids.has(id));
+      if (e?.actualizado) { $("#fresh").textContent = "Actualizado " + ago(e.actualizado); $("#fresh").title = new Date(e.actualizado).toLocaleString("es-ES"); }
+      if (gh) $("#editlink").innerHTML = `· <a href="${gh}" target="_blank" rel="noopener">Editar favoritos comunes</a>`;
+
+      const wanted = [location.hash.slice(1), store.get(LS_TEAM, null), common[0], local[0], teams[0]?.id]
+        .find((id) => id && ids.has(String(id)));
+      current = String(wanted);
+      renderPicker();
+      selectTeam(current);
+    } catch {
+      $("#view").innerHTML = `<div class="error">No se han podido cargar los datos. Inténtalo de nuevo más tarde.</div>`;
+    }
+  }
+  init();
+})();
+</script>
+</body>
+</html>

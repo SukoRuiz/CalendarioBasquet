@@ -1,0 +1,49 @@
+name: Actualizar calendarios
+
+on:
+  schedule:
+    - cron: "7 */2 * * *"   # cada 2 horas (hora UTC)
+  workflow_dispatch:         # botón "Run workflow" para forzar una actualización
+  push:
+    branches: [main]         # al editar favoritos.json o la web se vuelve a publicar
+
+permissions:
+  contents: write            # guardar la caché de pabellones/equipos
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Descargar calendarios del club
+        run: python scraper/scrape.py
+
+      - name: Guardar caché si ha cambiado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add cache
+          git diff --cached --quiet || (git commit -m "Actualizar caché de equipos y pabellones" && git push)
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
